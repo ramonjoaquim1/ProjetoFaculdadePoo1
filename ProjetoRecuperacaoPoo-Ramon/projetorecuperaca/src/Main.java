@@ -4,17 +4,23 @@ import Relatorios.*;
 
 import javax.swing.*;
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import static Repository.AlunoDAO.calcularMedia;
+//import static Repository.TelaLogin.exibirTelaLogin;
+//import static Repository.TelaLogin.verificarCredenciais;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException, ClassNotFoundException {
 
         exibirMensagemBoasVindas();
+        Object usuarioLogado = chamaSelecaoUsuario();
+        checaSenhaUsuario(usuarioLogado);
+//        exibirTelaLogin();
         chamaMenuPrincipal();
 
     }
@@ -152,4 +158,31 @@ public class Main {
             List<Aluno> alunos = AlunoDAO.buscaTodosa();
             RelatorioAlunoForm.emitirRelatorio(alunos);
     }
+
+    private static void checaSenhaUsuario(Object usuarioLogado) throws SQLException, ClassNotFoundException {
+        String senhaDigitada = JOptionPane.showInputDialog(null,
+                "Informe a senha do usuario: (123) ");
+        Usuario usuarioByLogin = UsuarioDAO.findUsuarioByLogin((String) usuarioLogado);
+
+        if (usuarioByLogin.getSenha().equals(senhaDigitada)) {
+            chamaMenuPrincipal();
+        } else {
+            JOptionPane.showMessageDialog(null, "Senha incorreta!");
+            checaSenhaUsuario(usuarioLogado);
+        }
+    }
+
+    private static Object chamaSelecaoUsuario() {
+        Object[] selectionValues = UsuarioDAO.findUsuariosSistemaInArray();
+        String initialSelection = (String) selectionValues[0];
+        Object selection = JOptionPane.showInputDialog(null, "Selecione o usuario:",
+                "Área do Professor", JOptionPane.QUESTION_MESSAGE, null, selectionValues, initialSelection);
+        return selection;
+    }
+
+    public static AlunoDAO getAlunoDAO() {
+        AlunoDAO AlunoDAO = new AlunoDAO();
+        return AlunoDAO;
+    }
+
 }
